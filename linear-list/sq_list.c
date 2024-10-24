@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h> // 引入 variadic functions 需要的头文件
+#include <stdarg.h> 
 
 int lang;
 
-// 双语输出，支持格式化字符串
+// 双语输出
 void lang_print(const char *format_en, const char *format_zh, ...) {
     va_list args;
     va_start(args, format_zh);
@@ -39,7 +39,7 @@ void enter_continue() {
 }
 
 // 初始化
-void init_list(int *list, int length) {
+int init_list(int *list, int length) {
     int i;
     for (i = 0; i < length; i++, list++) {
         lang_print("input place %d value(0 to stop): ", "输入位置%d的值(0停止): ", i + 1);
@@ -52,6 +52,7 @@ void init_list(int *list, int length) {
     lang_print("init completed\n", "初始化完成\n");
     lang_print("list length is %d\n", "列表长度是 %d\n", i);
     enter_continue();
+    return i;
 }
 
 // 遍历顺序表
@@ -70,18 +71,38 @@ void traverse_list(int *list, int length) {
 }
 
 // 插入
-void insert_list(int *list) {
-    int place, value;
+int insert_list(int *list,int real_length,int length) {
+    if(real_length==length){
+        lang_print("list full already\n","表已经满\n");
+        enter_continue();
+    return real_length;
+    }
+    int place, value,i=real_length-1;
     lang_print("input the place you want to insert: ", "输入想要插入值的位置: ");
     scanf("%d", &place);
     clear();
+    printf("%d",real_length);
+    if(place>length){
+        lang_print("the place is exceed the max length\n","位置值超出最大长度\n");
+        insert_list(list,real_length,length);
+        return real_length;
+    }
+    else if(place>real_length){
+        lang_print("the place will set in list tail\n","位置将置于表尾\n");
+        place=real_length+1;
+    }
     lang_print("input the value you want to change in place %d: ", "输入想要更改的位置 %d 的值: ", place);
     scanf("%d", &value);
-    list[place - 1] = value;
+    for(i;i>=place-1;i--){
+        list[i+1]=list[i];
+    }
+    list[place-1] = value;
     clear();
     getchar();
     lang_print("insert completed\n", "插入完成\n");
     enter_continue();
+    real_length ++;
+    return real_length;
 }
 
 // 搜索
@@ -107,7 +128,7 @@ void search_list(int *list, int length) {
 // main
 int main() {
     clear();
-    int length, end = 0, option;
+    int length, end = 0, option,real_length;
     printf("1(English) 2(中文): ");
     scanf("%d", &lang);
     clear();
@@ -115,7 +136,7 @@ int main() {
     scanf("%d", &length);
     int sq_list[length];
     clear();
-    init_list(sq_list, length);
+   real_length=init_list(sq_list, length);
     while (!end) {
         lang_print("1: traverse the list\n2: search value in list:\n3: insert value in list\n0: end this program\n", "1: 遍历列表\n2: 在列表中搜索值:\n3: 在列表中插入值\n0: 结束程序\n");
         lang_print("input your option: ", "输入选项: "); 
@@ -133,7 +154,7 @@ int main() {
                 search_list(sq_list, length);
                 break;
             case 3:
-                insert_list(sq_list);
+                real_length=insert_list(sq_list,real_length,length);
                 break;
             default:
                 lang_print("Invalid option. Please try again.\n", "选项不正确，重新输入.\n");
